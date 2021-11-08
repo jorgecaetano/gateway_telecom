@@ -1,0 +1,15 @@
+version: "3.7"
+services:
+
+  gateway:
+    build:
+      context: .
+    container_name: gateway
+    environment:
+      - FS_HOST=127.0.0.1
+      - FS_PORT=8080
+      - FS_USER=freeswitch
+      - FS_PASSWORD=works
+    ports:
+      - 64998:8000
+    restart: always
