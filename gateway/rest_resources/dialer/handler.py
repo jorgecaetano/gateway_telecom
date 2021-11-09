@@ -1,8 +1,11 @@
+from numbers import Number
+from threading import Thread
+from time import sleep
 from uuid import uuid4
 
 from flask import Blueprint
 from flask import request
-from typing import Dict
+from typing import Dict, AnyStr
 
 from gateway.rest_resources.dialer.funcs import send_cti_command
 
@@ -16,6 +19,17 @@ def make_calls():
     Returns:
         Dict: Dicionário contendo o sucesso da execução
     """
+
+    def _cti_make_calls(_dial_string: AnyStr, _destination: AnyStr, _process_id: AnyStr, _timeout: Number, _amount: Number):
+        res = send_cti_command('python', [
+            'fs_scripts.make_call',
+            _dial_string,
+            _destination,
+            _process_id,
+            str(_timeout),
+            str(_amount)
+        ])
+        print(res)
 
     data = request.get_json()
 
@@ -37,16 +51,17 @@ def make_calls():
 
     process_id = str(uuid4())
 
+    thread_list = []
+
     for key, value in map_destination.items():
-        dial_string = f'{trunk}/{key}'
-        res = send_cti_command('python', [
-            'fs_scripts.make_call',
-            dial_string,
-            key,
-            process_id,
-            str(timeout),
-            str(value)
-        ])
-        print(res)
+        for i in range(value):
+            dial_string = f'{trunk}/{key}'
+            sleep(0.01)
+            _dialer_thread = Thread(target=_cti_make_calls, args=(dial_string, key, process_id, timeout, 1))
+            thread_list.append(_dialer_thread)
+            _dialer_thread.start()
+
+    for each in thread_list:
+        each.join()
 
     return {'success': True}
