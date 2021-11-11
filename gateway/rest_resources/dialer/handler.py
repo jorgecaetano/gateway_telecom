@@ -1,3 +1,4 @@
+from datetime import datetime
 from numbers import Number
 from threading import Thread
 from time import sleep
@@ -7,6 +8,7 @@ from flask import Blueprint
 from flask import request
 from typing import Dict, AnyStr
 
+from gateway.libs.database.mongo_connection import get_mongo_connection
 from gateway.rest_resources.dialer.funcs import send_cti_command
 
 dialer_bp = Blueprint('dialer', __name__, url_prefix='/')
@@ -54,6 +56,13 @@ def make_calls():
     process_id = str(uuid4())
 
     thread_list = []
+
+    calls_processor_db = get_mongo_connection('dialer', 'calls_processor')
+    calls_processor_db.insert_one({
+        'process_id': process_id,
+        'destination': destination,
+        'timestamp': datetime.now()
+    })
 
     for key, value in map_destination.items():
         for i in range(value):
