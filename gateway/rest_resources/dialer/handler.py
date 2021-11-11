@@ -67,7 +67,7 @@ def make_calls():
     for key, value in map_destination.items():
         for i in range(value):
             dial_string = f'{trunk}/{key}'
-            sleep(0.01)
+            sleep(0.05)
             _dialer_thread = Thread(target=_cti_make_calls, args=(dial_string, key, cpf_cnpj, process_id, timeout, 1))
             thread_list.append(_dialer_thread)
             _dialer_thread.start()
