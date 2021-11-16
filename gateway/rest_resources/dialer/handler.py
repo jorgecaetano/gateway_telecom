@@ -22,7 +22,7 @@ def make_calls():
         Dict: Dicionário contendo o sucesso da execução
     """
 
-    def _cti_make_calls(_dial_string: AnyStr, _destination: AnyStr, _cpf_cnpj: AnyStr, _process_id: AnyStr, _timeout: Number, _amount: Number):
+    def _cti_make_calls(_dial_string: AnyStr, _destination: AnyStr, _cpf_cnpj: AnyStr, _process_id: AnyStr, _timeout: Number, _amount: Number, _record_call: AnyStr):
         res = send_cti_command('python', [
             'fs_scripts.make_call',
             _dial_string,
@@ -30,9 +30,9 @@ def make_calls():
             _cpf_cnpj,
             _process_id,
             str(_timeout),
-            str(_amount)
+            str(_amount),
+            record_call
         ])
-        print(res)
 
     data = request.get_json()
 
@@ -45,6 +45,7 @@ def make_calls():
 
     timeout = data['timeout']
     cpf_cnpj = data['cpf_cnpj']
+    record_call = 'TRUE' if data['record_call'] else 'FALSE'
 
     per_destination = int(amount / len(destination))
     rest = int(amount % len(destination))
@@ -68,7 +69,7 @@ def make_calls():
         for i in range(value):
             dial_string = f'{trunk}/{key}'
             sleep(0.05)
-            _dialer_thread = Thread(target=_cti_make_calls, args=(dial_string, key, cpf_cnpj, process_id, timeout, 1))
+            _dialer_thread = Thread(target=_cti_make_calls, args=(dial_string, key, cpf_cnpj, process_id, timeout, 1, record_call))
             thread_list.append(_dialer_thread)
             _dialer_thread.start()
 
